@@ -1,3 +1,4 @@
+import datetime
 from collections import OrderedDict
 
 import kivy
@@ -9,14 +10,26 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.slider import Slider
 from kivy.uix.spinner import Spinner
 from kivy.uix.switch import Switch
+from kivy.uix.popup import Popup
+
+import confwriter
+
+
+class LoadDialog(FloatLayout):
+    load = ObjectProperty(None)
+    cancel = ObjectProperty(None)
 
 
 class Controller(FloatLayout):
     switch1 = ObjectProperty(None)
     switch2 = ObjectProperty(None)
+    loadfile = ObjectProperty(None)
+    tabbedpanel = ObjectProperty(None)
+    path = None
+    filename = None
 
     def do_cancel(self):
-        print('cancel')
+        self.app.stop()
 
     def do_ok(self):
         values = []
@@ -30,13 +43,16 @@ class Controller(FloatLayout):
         for key, value in self.switch1.ids.items() + self.switch2.ids.items():
             values.append(self.apply_fix(key, self.get_value(value)))
         # Global values
-        global_keys = ['fps', 'camera_name', 'dt', 'dcf_prefix']
+        global_keys = ['fps', 'camera_name', 'dcf_prefix']
         for key in global_keys:
             values.append(self.apply_fix(key, self.get_value(self.ids[key])))
-        print(values)
 
-    def touch_up(self, *args, **kwargs):
-        print(args, kwargs)
+        # Insert date
+        date = self.get_date()
+        values.insert(-1, date)
+        # return path
+        # return model(tab name)
+        confwriter.confmaker(self.path, self.tabbedpanel.current_tab.text, values)
 
     def get_value(self, obj):
         if isinstance(obj, Switch):
@@ -57,6 +73,25 @@ class Controller(FloatLayout):
             return getattr(self.app, key + '_values')[value]
 
         return value
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
+
+    def show_load(self):
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup)
+        self._popup = Popup(title="Load file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def load(self, path, filename):
+        self.path = path
+        # self.filename = len(filename) and filename[0]
+        self.dismiss_popup()
+
+    def get_date(self):
+        date = datetime.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
+
+        return date
 
 
 class ControllerApp(App):

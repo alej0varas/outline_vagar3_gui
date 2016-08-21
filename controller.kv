@@ -1,6 +1,6 @@
 #:kivy 1.0.9
 
-<SG@GridLayout>:
+<SGROAM3@GridLayout>:
     cols: 2
 
     Label:
@@ -78,42 +78,38 @@
 <Controller>:
     switch1: switch1
     switch2: switch2
+    tabbedpanel: tabbedpanel
 
     BoxLayout:
-
         orientation: 'vertical'
 
-        BoxLayout:
-            orientation: 'horizontal'
+        TabbedPanel:
+            id: tabbedpanel
+            do_default_tab: False
 
-            BoxLayout:
-                orientation: 'vertical'
+            TabbedPanelItem:
+                text: 'ROAM3'
 
-                Label:
-                    text: 'SWITCH_1'
-                    size_hint: (1, .05)
+                BoxLayout:
+                    orientation: 'horizontal'
 
-                SG:
-                    id: switch1
+                    SGROAM3:
+                        id:switch1
+                    SGROAM3:
+                        id:switch2
 
-            BoxLayout:
-                orientation: 'vertical'
-
-                Label:
-                    text: 'SWITCH_2'
-                    size_hint: (1, .05)
-
-                SG:
-                    id: switch2
+            TabbedPanelItem:
+                text: 'ROAM1'
 
         GridLayout:
+            id: global_vars
             cols: 2
             size_hint: (1, .3)
 
             Label:
                 text: 'UPDATE'
             Switch:
-                id: update
+                id: update    
 
             Label:
                 text: 'UPDATE_FW'
@@ -132,19 +128,20 @@
                 id: camera_name
 
             Label:
-                text: 'Date and Time'
-            TextInput:
-                id: dt
-
-            Label:
                 text: 'DCF File Prefix'
             TextInput:
                 id: dcf_prefix
 
+            Label:
+                text: 'File path'
+            Button:
+                text: 'Load'
+                on_release: root.show_load()
+
         BoxLayout:
             orientation: 'horizontal'
             size_hint: (1, .1)
-
+    
             Button:
                 text: 'Cancel'
                 on_press: root.do_cancel()
@@ -152,3 +149,23 @@
             Button:
                 text: 'Save'
                 on_press: root.do_ok()
+
+
+<LoadDialog>:
+    BoxLayout:
+        size: root.size
+        pos: root.pos
+        orientation: "vertical"
+        FileChooserListView:
+            id: filechooser
+
+        BoxLayout:
+            size_hint_y: None
+            height: 30
+            Button:
+                text: "Cancel"
+                on_release: root.cancel()
+
+            Button:
+                text: "Load"
+                on_release: root.load(filechooser.path, filechooser.selection)
